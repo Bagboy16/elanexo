@@ -77,8 +77,11 @@
 							.single();
 						payload.new.userid = user;
 						messagesList = [...messagesList, payload.new];
-						if (messagesList.length > 100) messagesList.reverse().pop();
-						// messagesList.reverse();
+						if (messagesList.length > 100) {
+							messagesList.reverse().pop();
+							messagesList.reverse();
+						}
+						
 					}
 					if (payload.eventType == 'DELETE') {
 						messagesList = messagesList.filter((msg) => msg.id != payload.old.id);
@@ -91,6 +94,9 @@
 			.subscribe();
 	}
 	const sendNewMessage = async () => {
+		if (newMessage == ''){
+			newMessage = 'soy jodidamente gay'
+		}
 		const msgData = {
 			content: newMessage,
 			userid: data?.session?.user.id,
