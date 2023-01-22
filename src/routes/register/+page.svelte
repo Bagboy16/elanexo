@@ -23,7 +23,7 @@
 					required
 				/>
 			</div>
-			<div class="form-group" style="margin-bottom: 5rem;">
+			<div class="form-group" style="margin-bottom: 2rem;">
 				<input
 					id="password"
 					type="password"
@@ -32,6 +32,8 @@
 					placeholder="Password"
 					required
 				/>
+				<small>Te llegará un <span class="text-secondary">correo de verificación.</span></small>
+			<div class="text-muted"><small>puede tardar unos minutos, es que nuestros esclavos son de los baratos y no dan para tanto.</small></div>
 			</div>
 			<div class="form-group mb-3">
 				<button type="submit" class="btn btn-primary">Registrarse</button>
