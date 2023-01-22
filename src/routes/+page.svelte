@@ -8,8 +8,8 @@
 	let messagesList: Array<any> = [];
 	let newMessage: string;
 	let element: Element;
+	let userProfile: Object | null
 	if (data.session) {
-		try {
 			const getProfile = async () => {
 				let { data: profiles, error: err } = await supabaseClient
 					.from('profiles')
@@ -18,6 +18,7 @@
 					.single();
 				if (profiles) {
 					profiles.username ? (username = profiles.username) : (username = 'anon');
+					userProfile = profiles
 				}
 
 				if (err) {
@@ -25,12 +26,6 @@
 				}
 			};
 			getProfile();
-		} catch (err) {
-			throw error(500, {
-				message: 'Error: ' + err
-			});
-		}
-
 		try {
 			const getMessages = async () => {
 				let { data: messages, error: err } = await supabaseClient
@@ -58,15 +53,15 @@
 			});
 		}
 
-		// const profiles = supabaseClient
-		// 	.channel('custom-all-channel')
-		// 	.on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (payload) => {
-		// 		console.log(payload)
-		// 		if (payload.eventType == 'UPDATE' && payload.new.id === data?.session?.user.id) {
-		// 			username = payload.new.username;
-		// 		}
-		// 	})
-		// 	.subscribe();
+		const profiles = supabaseClient
+			.channel('custom-all-channel')
+			.on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (payload) => {
+				console.log(payload)
+				if (payload.eventType == 'UPDATE' && payload.new.id === data?.session?.user.id) {
+					userProfile = payload.new;
+				}
+			})
+			.subscribe();
 
 		const messages = supabaseClient
 			.channel('custom-insert-channel')
@@ -146,7 +141,8 @@
 				{/each}
 			</div>
 			<div class="sendmsg">
-				<form on:submit|preventDefault={sendNewMessage} class="p-2">
+				{#if userProfile?.is_mute === false}
+				<form on:submit|preventDefault={sendNewMessage} class="p-2" autocomplete="off">
 					<div class="input-group">
 						<input
 							type="text"
@@ -159,6 +155,9 @@
 						<button class="btn btn-primary" type="submit" id="basic-addon1">Enviar</button>
 					</div>
 				</form>
+				{:else}
+					<p>Has sido <span class="text-secondary"><strong>Silenciado</strong></span>, no puedes enviar mensajes</p>
+				{/if}
 			</div>
 		</div>
 		<form action="/logout" method="POST">
