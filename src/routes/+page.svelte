@@ -10,7 +10,8 @@
 	let element: Element
 	if (data.session) {
 		console.log(data.session);
-		const getProfile = async () => {
+		try{
+			const getProfile = async () => {
 			let { data: profiles, error: err } = await supabaseClient
 				.from('profiles')
 				.select('*')
@@ -24,7 +25,13 @@
 				throw error(400, err.message);
 			}
 		};
-		const getMessages = async () => {
+		getProfile();
+		} catch (err) {
+			throw error(500);
+		}
+		
+		try{
+			const getMessages = async () => {
 			let { data: messages, error: err } = await supabaseClient.from('messages').select(
 				`id,
 				content,
@@ -38,12 +45,16 @@
 				console.log(err);
 			}
 		};
-		getProfile();
 		getMessages();
+		} catch (err) {
+			console.log(err);
+			throw error(500);
+		}
+
 		const profiles = supabaseClient
 			.channel('custom-all-channel')
 			.on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (payload) => {
-				if (payload.eventType == 'UPDATE') {
+				if (payload.eventType == 'UPDATE' && payload.new.id === data?.session?.user.id) {
 					username = payload.new.username;
 				}
 			})
