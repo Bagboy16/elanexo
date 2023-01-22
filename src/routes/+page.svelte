@@ -51,14 +51,15 @@
 			throw error(500);
 		}
 
-		const profiles = supabaseClient
-			.channel('custom-all-channel')
-			.on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (payload) => {
-				if (payload.eventType == 'UPDATE' && payload.new.id === data?.session?.user.id) {
-					username = payload.new.username;
-				}
-			})
-			.subscribe();
+		// const profiles = supabaseClient
+		// 	.channel('custom-all-channel')
+		// 	.on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (payload) => {
+		// 		console.log(payload)
+		// 		if (payload.eventType == 'UPDATE' && payload.new.id === data?.session?.user.id) {
+		// 			username = payload.new.username;
+		// 		}
+		// 	})
+		// 	.subscribe();
 
 		const messages = supabaseClient
 			.channel('custom-insert-channel')
@@ -141,7 +142,7 @@
 							bind:value={newMessage}
 							placeholder="Mensaje"
 						/>
-						<button class="btn btn-primary" type="button" id="basic-addon1">Enviar</button>
+						<button class="btn btn-primary" type="submit" id="basic-addon1">Enviar</button>
 					</div>
 				</form>
 			</div>

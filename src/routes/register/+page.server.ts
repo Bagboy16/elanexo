@@ -5,7 +5,6 @@ import type { Actions } from "./$types";
 
 export const actions: Actions = {
     register: async ({ request, locals }) => {
-         try {
             const body = Object.fromEntries(await request.formData())
             if (body.email === undefined && body.password === undefined) {
                 throw error(400, {
@@ -28,10 +27,5 @@ export const actions: Actions = {
                 })
             }
             throw redirect(303, "/")
-        } catch {
-            throw error(500, {
-                message: `Error del servidor, intente de nuevo. Si el error persiste, porfavor reportar al Administrador.`
-            })
-        }
     }
 }
