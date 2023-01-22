@@ -9,7 +9,6 @@
 	let newMessage: string;
 	let element: Element;
 	if (data.session) {
-		console.log(data.session);
 		try {
 			const getProfile = async () => {
 				let { data: profiles, error: err } = await supabaseClient
@@ -27,28 +26,36 @@
 			};
 			getProfile();
 		} catch (err) {
-			throw error(500);
+			throw error(500, {
+				message: 'Error: ' + err
+			});
 		}
 
 		try {
 			const getMessages = async () => {
-				let { data: messages, error: err } = await supabaseClient.from('messages').select(
-					`id,
+				let { data: messages, error: err } = await supabaseClient
+					.from('messages')
+					.select(
+						`id,
 				content,
 				userid: profiles(username),
 				sent`
-				).order('sent', {ascending: false}).range(0, 100);
+					)
+					.order('sent', { ascending: false })
+					.range(0, 100);
 				if (messages) {
 					messagesList = messages.reverse();
 				}
 				if (err) {
-					console.log(err);
+					console.log('Error getting Messages: ' + err);
 				}
 			};
 			getMessages();
 		} catch (err) {
-			console.log(err);
-			throw error(500);
+			console.log('Error fetching messages: ' + err);
+			throw error(500, {
+				message: 'Error: ' + err
+			});
 		}
 
 		// const profiles = supabaseClient
@@ -75,11 +82,14 @@
 							.single();
 						payload.new.userid = user;
 						messagesList = [...messagesList, payload.new];
-						if (messagesList.length > 100) messagesList.reverse().pop()
-						messagesList.reverse()
+						if (messagesList.length > 100) messagesList.reverse().pop();
+						// messagesList.reverse();
 					}
 					if (payload.eventType == 'DELETE') {
 						messagesList = messagesList.filter((msg) => msg.id != payload.old.id);
+					}
+					if (payload.eventType == 'UPDATE') {
+						messagesList[messagesList.findIndex((msg) => msg.id == payload.new.id)].content = payload.new.content;
 					}
 				}
 			)
@@ -91,25 +101,20 @@
 			userid: data?.session?.user.id,
 			sent: new Date(Date.now())
 		};
-		console.log(msgData);
+		console.log('messagedata' + msgData);
 		let { data: sentMessage, error: err } = await supabaseClient.from('messages').insert(msgData);
-		if (sentMessage) {
-			console.log(sentMessage);
-		}
 		if (err) {
 			console.error(err);
 		}
 		newMessage = '';
 	};
 	afterUpdate(() => {
-		console.log('afterUpdate');
 		if (messagesList) scrollToBottom(element);
 	});
 	const scrollToBottom = async (node: Element) => {
-		node.scroll({ top: node.scrollHeight, behavior: 'smooth' });
+		node?.scroll({ top: node.scrollHeight, behavior: 'smooth' });
 	};
 </script>
-
 <div
 	class="maincont col-md-5 d-flex-column align-items-center justify-content-center text-center"
 	style="margin:auto; height: 100%"
@@ -126,7 +131,9 @@
 							<div class="card-header" style="font-size: medium;">
 								{message.userid.username}
 								<small style="font-size: xx-small; color: #ea39b8;">
-									{new Date(message.sent).toLocaleDateString() + " " + new Date(message.sent).toLocaleTimeString()}
+									{new Date(message.sent).toLocaleDateString() +
+										' ' +
+										new Date(message.sent).toLocaleTimeString()}
 								</small>
 							</div>
 							<div class="card-body">
@@ -144,7 +151,7 @@
 						<input
 							type="text"
 							name="content"
-							id="text"
+							id="textarea"
 							class="form-control"
 							bind:value={newMessage}
 							placeholder="Mensaje"

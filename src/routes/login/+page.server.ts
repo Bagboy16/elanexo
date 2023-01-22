@@ -10,7 +10,8 @@ export const actions: Actions = {
 			email: body.email as string,
 			password: body.password as string,
 		})
-            if (err) { 
+        if (err) {
+            console.error(err)
             if (err instanceof AuthApiError && err.status !== 500) {
                 throw error(err.status, {
                     message: err.message
@@ -20,7 +21,6 @@ export const actions: Actions = {
                 message: `Error del servidor, intente de nuevo. Si el error persiste, porfavor reportar al Administrador. Error: ${err.message}(${err.code})`
             })
         }
-
         throw redirect(303, "/")
     }
     
