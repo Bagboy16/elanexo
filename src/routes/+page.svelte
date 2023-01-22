@@ -37,9 +37,9 @@
 				content,
 				userid: profiles(username),
 				sent`
-				);
+				).order('sent', {ascending: false}).range(0, 100);
 				if (messages) {
-					messagesList = messages;
+					messagesList = messages.reverse();
 				}
 				if (err) {
 					console.log(err);
@@ -75,6 +75,8 @@
 							.single();
 						payload.new.userid = user;
 						messagesList = [...messagesList, payload.new];
+						if (messagesList.length > 100) messagesList.reverse().pop()
+						messagesList.reverse()
 					}
 					if (payload.eventType == 'DELETE') {
 						messagesList = messagesList.filter((msg) => msg.id != payload.old.id);
