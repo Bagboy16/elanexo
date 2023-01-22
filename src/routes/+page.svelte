@@ -7,45 +7,45 @@
 	let username: string | null;
 	let messagesList: Array<any> = [];
 	let newMessage: string;
-	let element: Element
+	let element: Element;
 	if (data.session) {
 		console.log(data.session);
-		try{
+		try {
 			const getProfile = async () => {
-			let { data: profiles, error: err } = await supabaseClient
-				.from('profiles')
-				.select('*')
-				.eq('id', data?.session?.user.id)
-				.single();
-			if (profiles) {
-				profiles.username ? (username = profiles.username) : (username = 'anon');
-			}
+				let { data: profiles, error: err } = await supabaseClient
+					.from('profiles')
+					.select('*')
+					.eq('id', data?.session?.user.id)
+					.single();
+				if (profiles) {
+					profiles.username ? (username = profiles.username) : (username = 'anon');
+				}
 
-			if (err) {
-				throw error(400, err.message);
-			}
-		};
-		getProfile();
+				if (err) {
+					throw error(400, err.message);
+				}
+			};
+			getProfile();
 		} catch (err) {
 			throw error(500);
 		}
-		
-		try{
+
+		try {
 			const getMessages = async () => {
-			let { data: messages, error: err } = await supabaseClient.from('messages').select(
-				`id,
+				let { data: messages, error: err } = await supabaseClient.from('messages').select(
+					`id,
 				content,
 				userid: profiles(username),
 				sent`
-			);
-			if (messages) {
-				messagesList = messages;
-			}
-			if (err) {
-				console.log(err);
-			}
-		};
-		getMessages();
+				);
+				if (messages) {
+					messagesList = messages;
+				}
+				if (err) {
+					console.log(err);
+				}
+			};
+			getMessages();
 		} catch (err) {
 			console.log(err);
 			throw error(500);
@@ -121,7 +121,12 @@
 				{#each messagesList as message (message.id)}
 					<div class="msg mb-1" style="text-align: left;">
 						<div class="card text-white bg-dark">
-							<div class="card-header">{message.userid.username}</div>
+							<div class="card-header" style="font-size: medium;">
+								{message.userid.username}
+								<small style="font-size: xx-small; color: #ea39b8;">
+									{new Date(message.sent).toLocaleDateString() + " " + new Date(message.sent).toLocaleTimeString()}
+								</small>
+							</div>
 							<div class="card-body">
 								<p class="card-text">
 									{message.content}
@@ -157,15 +162,15 @@
 		<form action="?/setUsername" method="post" class="auth-form">
 			<input type="text" name="userid" style="display: none;" value={data?.session?.user.id} />
 			<div class="input-group">
-						<input
-							type="text"
-							name="username"
-							id="username"
-							class="form-control"
-							placeholder="Username"
-						/>
-						<button class="btn btn-primary" type="submit" id="basic-addon1">Escoger</button>
-					</div>
+				<input
+					type="text"
+					name="username"
+					id="username"
+					class="form-control"
+					placeholder="Username"
+				/>
+				<button class="btn btn-primary" type="submit" id="basic-addon1">Escoger</button>
+			</div>
 		</form>
 	{:else}
 		<div class="auth-buttons">
